@@ -18,10 +18,6 @@ class monteCarloLearningAgent():
         print(QMatrix)
     pass
 
-class qLearning():
-    def __init__(self, observationSpaceSize):
-        self.qMatrix = np.zeros((observationSpaceSize))
-    
 
 def customRender(self, mode='human'):
     out = self.desc.copy().tolist()
