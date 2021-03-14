@@ -10,13 +10,24 @@ Andrew Ruskamp-White
 """
 import gym
 import numpy as np
+import random
+
+EPSILON = 0.1
 
 class monteCarloLearningAgent():
     def __init__(self, actionSpaceSize, observationSpaceSize):
-        actions = list(range(actionSpaceSize))
-        QMatrix = np.zeros((observationSpaceSize, actionSpaceSize))
-        print(QMatrix)
-    pass
+        self.actions = list(range(actionSpaceSize))
+        self.QMatrix = np.zeros((observationSpaceSize, actionSpaceSize))
+##        print(self.QMatrix)
+
+    def chooseAction(self):
+        # Epsilon greedy policy
+        # Choose the best option available or choose random at probability of epsilon
+        if random.random() <= EPSILON:
+            actionIndex = random.choice(self.actions)
+        else:
+            actionIndex = np.argmax(self.QMatrix)
+        return actionIndex
 
 
 def customRender(self, mode='human'):
@@ -51,7 +62,8 @@ for i_episode in range(40):
     for t in range(100):
         env.render(env)
         print(observation)
-        action = env.action_space.sample()
+##        action = env.action_space.sample()
+        action = monteCarlo.chooseAction()
         observation, reward, done, info = env.step(action)
 ##        done = True
 ##        env.render(env)
