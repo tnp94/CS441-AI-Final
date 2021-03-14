@@ -18,7 +18,6 @@ class monteCarloLearningAgent():
     def __init__(self, actionSpaceSize, observationSpaceSize):
         self.actions = list(range(actionSpaceSize))
         self.QMatrix = np.zeros((observationSpaceSize, actionSpaceSize))
-##        print(self.QMatrix)
 
     def chooseAction(self):
         # Epsilon greedy policy
@@ -51,6 +50,7 @@ def customRender(self, mode='human'):
         print(["South", "North", "East", "West", "Pickup", "Dropoff"][self.lastaction])
     else:
         print("\n")
+        
 
 env = gym.make('Taxi-v3')
 env.render = customRender
@@ -62,11 +62,9 @@ for i_episode in range(40):
     for t in range(100):
         env.render(env)
         print(observation)
-##        action = env.action_space.sample()
         action = monteCarlo.chooseAction()
         observation, reward, done, info = env.step(action)
-##        done = True
-##        env.render(env)
+
         if done:
             print("Episode finished after {} timesteps".format(t+1))
             break
