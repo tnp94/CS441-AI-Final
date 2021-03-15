@@ -1,0 +1,5 @@
+This will just be a list of to-do items from the On Policy MCM agent.
+(This is helpful for me in remembering what's done/next steps/etc)
+
+- [ ] calculate Return Values from the first visit of each state the end of each episode
+- [ ] decide on if we want to use a discount (gamma) or not. Potential default = 1 (no gamma)
