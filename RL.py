@@ -19,13 +19,16 @@ class monteCarloLearningAgent():
         self.actions = list(range(actionSpaceSize))
         self.QMatrix = np.zeros((observationSpaceSize, actionSpaceSize))
 
-    def chooseAction(self):
+    def chooseAction(self, observation):
         # Epsilon greedy policy
         # Choose the best option available or choose random at probability of epsilon
         if random.random() <= EPSILON:
             actionIndex = random.choice(self.actions)
         else:
-            actionIndex = np.argmax(self.QMatrix)
+##            actionIndex = random.choice(np.argmax(self.QMatrix[observation]))
+            # get a list of actions that have the max value, randomly choose one of those
+            choices = np.where(self.QMatrix[observation] == max(self.QMatrix[observation]))[0]
+            actionIndex = random.choice(choices)
         return actionIndex
 
 
@@ -59,13 +62,24 @@ monteCarlo = monteCarloLearningAgent(env.action_space.n, env.observation_space.n
 
 for i_episode in range(40):
     observation = env.reset()
+    statesVisited = []
+    stateRewards = []
     for t in range(100):
         env.render(env)
-        print(observation)
-        action = monteCarlo.chooseAction()
+        print(observation, "\n\n--------------------------------------")
+        action = monteCarlo.chooseAction(observation)
         observation, reward, done, info = env.step(action)
 
+        # First visit mc
+        if observation not in statesVisited:
+            statesVisited.append(observation)
+            stateRewards.append(reward)
+        
         if done:
             print("Episode finished after {} timesteps".format(t+1))
             break
+    
+    print("Episode recap:\nState\t|\tReward")
+    for i in range(len(statesVisited)):
+        print(statesVisited[i], "\t|\t",stateRewards[i])
 env.close()
