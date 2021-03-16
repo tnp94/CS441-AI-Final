@@ -5,6 +5,7 @@ This will just be a list of to-do items from the On Policy MCM agent.
 - [ ] decide on if we want to use a discount (gamma) or not. Potential default = 1 (no gamma)
 - [ ] Add a Returns(s,a), and empty list that stores all returns for all state action pairs.
         This is used to c
+- [ ] We should make a random agent as a control/baseline to see if our agent is working any better!
 
 
 Pseudo Code for Sutton & Barto:
@@ -21,6 +22,8 @@ Loop:
     Generate an episode following pi until completion: S0, A0, R1, ... S(t-1), A(t-1), R(T)
     G <- 0 Note: This represents total reward from the first visit at each state action pair.
             I believe it is cumulative
+            #TODO add pseudo code for iterating backwards through the list and updating g with g * discount,
+               # I forgot to add it
     Unless pair St, At appears in S0, A0, R1, ... S(t-1), A(t-1), R(T):
         Append G to Returns(St,At)
         Q(St,At) <- average(Returns(St,At))
