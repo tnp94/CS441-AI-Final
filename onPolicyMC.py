@@ -19,6 +19,7 @@ class monteCarloLearningAgent():
     def __init__(self, actionSpaceSize, observationSpaceSize):
         self.actions = list(range(actionSpaceSize))
         self.QMatrix = np.zeros((observationSpaceSize, actionSpaceSize))
+        self.ReturnQMatrix =
 
     def chooseAction(self, observation):
         # Epsilon greedy policy
