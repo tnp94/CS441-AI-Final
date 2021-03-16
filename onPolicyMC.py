@@ -19,7 +19,9 @@ class monteCarloLearningAgent():
     def __init__(self, actionSpaceSize, observationSpaceSize):
         self.actions = list(range(actionSpaceSize))
         self.QMatrix = np.zeros((observationSpaceSize, actionSpaceSize))
-        self.ReturnQMatrix =
+        self.ReturnQMatrix = np.zeros((observationSpaceSize, actionSpaceSize, 2))
+        # the two represents two items we're saving: Running average and the number of times the State/Action pair
+        # have been visited. [0] is running average [1] is number of visits.
 
     def chooseAction(self, observation):
         # Epsilon greedy policy
@@ -37,19 +39,26 @@ class monteCarloLearningAgent():
     # first time step.
     def updateValues_FirstVisit(self, states, rewards, actionsTaken):
         # Q table values updated only after an Episode has ended.
-        retG = 0 # value of reward returned from each timestep
+        retG = 0  # value of reward returned from each timestep
         firstVisitDict = {} # Tracking the State action pairs that we first visited.
         for t in range(states[-1], -1, -1):  # Starting at the end and working backwards
-            retG = GAMMA * retG + rewards[t]
+            # thought: we could assign states[t], rewards[t], actionsTaken[t] to local variables for readability.
+            retG = GAMMA * retG + rewards[t]  # updating G to new value of reward + discounted previous G
             if (states[t], actionsTaken[t]) not in firstVisitDict:
                 # Do these calculations only for the first time we visit states from this episode
                 firstVisitDict[(states[t],actionsTaken[t])] = 1  # we've now visited this state.
-                ## pausing here - Andrew
-            #TODO: I'm following the psuedo code found on Slack.
-            #TODO: next steps are to save to our Qmatrix the average value of returns(s,a)
-            #TODO: I think this means we'll need to add a returns(s,a) data structure to store these average returns.
-                # I saw some implementations of it that use it to store State, action values (much like Q matrix) plus
-                # The running average of that s,a pair and the number of times its been visited.
+                # Updating the # of times visited this particular state action pair
+                self.ReturnQMatrix[states[t]][actionsTaken[t]][1] += 1
+                # calculate average rewards for this state action pair
+                # (current avg value * number times visited - 1) + retG  / num times visited
+                # ^^ first part done to get total reward pre-update
+                curTotal = self.ReturnQMatrix[states[t]][actionsTaken[t]][0] * \
+                           (self.ReturnQMatrix[states[t]][actionsTaken[t]][1] - 1)
+                newAverage = (curTotal + retG) / self.ReturnQMatrix[states[t]][actionsTaken[t]][1]
+                self.ReturnQMatrix[states[t]][actionsTaken[t]][0] = newAverage
+                self.QMatrix[states[t]][actionsTaken[t]] = self.ReturnQMatrix[states[t]][actionsTaken[t]][0]
+                # I realize this isn't terribly pythonic, but I hope its more readable. feel free to change it. -A
+
 
 
 
