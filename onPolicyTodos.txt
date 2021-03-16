@@ -3,3 +3,15 @@ This will just be a list of to-do items from the On Policy MCM agent.
 
 - [ ] calculate Return Values from the first visit of each state the end of each episode
 - [ ] decide on if we want to use a discount (gamma) or not. Potential default = 1 (no gamma)
+- [ ] Add a Returns(s,a), and empty list that stores all returns for all state action pairs.
+        This is used to c
+
+
+Pseudo Code for Sutton & Barto:
+small epsilon > 0
+initialize:
+    pi <- arbitrary epsilon-soft policy
+
+Summary/Pseudo Code for our purposes:
+(feel free to update/add, this is how I think best.)
+Agent take actions

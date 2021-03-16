@@ -13,6 +13,7 @@ import numpy as np
 import random
 
 EPSILON = 0.1
+GAMMA = 1  # Rate of discount.
 
 class monteCarloLearningAgent():
     def __init__(self, actionSpaceSize, observationSpaceSize):
@@ -31,8 +32,27 @@ class monteCarloLearningAgent():
             actionIndex = random.choice(choices)
         return actionIndex
 
-    def updateValues(self, states, rewards):
-        for
+    # Input: States, rewards, actions all indexed chronologically. actions[0], states[0], rewards[0] all reference
+    # first time step.
+    def updateValues_FirstVisit(self, states, rewards, actionsTaken):
+        # Q table values updated only after an Episode has ended.
+        retG = 0 # value of reward returned from each timestep
+        firstVisitDict = {} # Tracking the State action pairs that we first visited.
+        for t in range(states[-1], -1, -1):  # Starting at the end and working backwards
+            retG = GAMMA * retG + rewards[t]
+            if (states[t], actionsTaken[t]) not in firstVisitDict:
+                # Do these calculations only for the first time we visit states from this episode
+                firstVisitDict[(states[t],actionsTaken[t])] = 1  # we've now visited this state.
+                ## pausing here - Andrew
+            #TODO: I'm following the psuedo code found on Slack.
+            #TODO: next steps are to save to our Qmatrix the average value of returns(s,a)
+            #TODO: I think this means we'll need to add a returns(s,a) data structure to store these average returns.
+                # I saw some implementations of it that use it to store State, action values (much like Q matrix) plus
+                # The running average of that s,a pair and the number of times its been visited.
+
+
+
+
 
 
 def customRender(self, mode='human'):
@@ -67,6 +87,7 @@ for i_episode in range(40):
     observation = env.reset()
     statesVisited = []
     stateRewards = []
+    actionsTaken = []
     for t in range(100):
         env.render(env)
         print(observation, "\n\n--------------------------------------")
@@ -76,6 +97,7 @@ for i_episode in range(40):
         # First visit mc
         if observation not in statesVisited:
             statesVisited.append(observation)
+            actionsTaken.append(action)
             stateRewards.append(reward)
         
         if done:
