@@ -12,8 +12,10 @@ import gym
 import numpy as np
 import random
 
-EPSILON = 0.1
-GAMMA = 1  # Rate of discount.
+EPSILON = 1
+GAMMA = 0.9  # Rate of discount.
+EPISODES = 50000
+MAX_STEPS = 100
 
 class monteCarloLearningAgent():
     def __init__(self, actionSpaceSize, observationSpaceSize):
@@ -29,7 +31,6 @@ class monteCarloLearningAgent():
         if random.random() <= EPSILON:
             actionIndex = random.choice(self.actions)
         else:
-##            actionIndex = random.choice(np.argmax(self.QMatrix[observation]))
             # get a list of actions that have the max value, randomly choose one of those
             choices = np.where(self.QMatrix[observation] == max(self.QMatrix[observation]))[0]
             actionIndex = random.choice(choices)
@@ -41,7 +42,7 @@ class monteCarloLearningAgent():
         # Q table values updated only after an Episode has ended.
         retG = 0  # value of reward returned from each timestep
         firstVisitDict = {} # Tracking the State action pairs that we first visited.
-        for t in range(states[-1], -1, -1):  # Starting at the end and working backwards
+        for t in reversed(range(len(states))):  # Starting at the end and working backwards
             # thought: we could assign states[t], rewards[t], actionsTaken[t] to local variables for readability.
             retG = GAMMA * retG + rewards[t]  # updating G to new value of reward + discounted previous G
             if (states[t], actionsTaken[t]) not in firstVisitDict:
@@ -58,6 +59,7 @@ class monteCarloLearningAgent():
                 self.ReturnQMatrix[states[t]][actionsTaken[t]][0] = newAverage
                 self.QMatrix[states[t]][actionsTaken[t]] = self.ReturnQMatrix[states[t]][actionsTaken[t]][0]
                 # I realize this isn't terribly pythonic, but I hope its more readable. feel free to change it. -A
+
 
 
 
@@ -93,28 +95,31 @@ env.render = customRender
 
 monteCarlo = monteCarloLearningAgent(env.action_space.n, env.observation_space.n)
 
-for i_episode in range(40):
+for i_episode in range(EPISODES):
+    EPSILON = EPSILON-(1.0/EPISODES)
     observation = env.reset()
     statesVisited = []
     stateRewards = []
     actionsTaken = []
-    for t in range(100):
-        env.render(env)
-        print(observation, "\n\n--------------------------------------")
+    for t in range(MAX_STEPS):
+##        if i_episode % 5000 == 0:
+##            env.render(env)
+##            print(observation, "\n\n--------------------------------------")
         action = monteCarlo.chooseAction(observation)
         observation, reward, done, info = env.step(action)
 
-        # First visit mc
-        if observation not in statesVisited:
-            statesVisited.append(observation)
-            actionsTaken.append(action)
-            stateRewards.append(reward)
+        statesVisited.append(observation)
+        actionsTaken.append(action)
+        stateRewards.append(reward)
         
         if done:
-            print("Episode finished after {} timesteps".format(t+1))
+            print("Episode", i_episode+1, "finished after", t+1, "timesteps")
             break
+
+    monteCarlo.updateValues_FirstVisit(statesVisited, stateRewards,actionsTaken)
     
-    print("Episode recap:\nState\t|\tReward")
-    for i in range(len(statesVisited)):
-        print(statesVisited[i], "\t|\t",stateRewards[i])
+##    if i_episode % 5000 == 0:
+##        print("Episode recap:\nState\t|\tReward")
+##        for i in range(len(statesVisited)):
+##            print(statesVisited[i], "\t|\t",stateRewards[i])
 env.close()
