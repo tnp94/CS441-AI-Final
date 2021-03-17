@@ -80,6 +80,6 @@ for i_episode in range(40):
             break
     
     print("Episode recap:\nState\t|\tReward")
-    for i in range(len(statesVisited)):
+    #for i in range(len(statesVisited)):
         print(statesVisited[i], "\t|\t",stateRewards[i])
 env.close()

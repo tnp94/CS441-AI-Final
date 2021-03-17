@@ -14,13 +14,14 @@ import random
 
 EPSILON = 1
 GAMMA = 0.9  # Rate of discount.
-EPISODES = 50000
+EPISODES = 100000
 MAX_STEPS = 100
 
 class monteCarloLearningAgent():
     def __init__(self, actionSpaceSize, observationSpaceSize):
         self.actions = list(range(actionSpaceSize))
-        self.QMatrix = np.zeros((observationSpaceSize, actionSpaceSize))
+        # Changing default to -100 to help with late episode oscillations btwn two states not prev visited.
+        self.QMatrix = np.full((observationSpaceSize, actionSpaceSize), -100)
         self.ReturnQMatrix = np.zeros((observationSpaceSize, actionSpaceSize, 2))
         # the two represents two items we're saving: Running average and the number of times the State/Action pair
         # have been visited. [0] is running average [1] is number of visits.
@@ -89,18 +90,20 @@ def customRender(self, mode='human'):
     else:
         print("\n")
         
-
+# file = open('onPolicyData.csv', 'w')
 env = gym.make('Taxi-v3')
 env.render = customRender
 
 monteCarlo = monteCarloLearningAgent(env.action_space.n, env.observation_space.n)
 
 for i_episode in range(EPISODES):
+    done = False
     EPSILON = EPSILON-(1.0/EPISODES)
     observation = env.reset()
     statesVisited = []
     stateRewards = []
     actionsTaken = []
+    totalReward = 0
     for t in range(MAX_STEPS):
 ##        if i_episode % 5000 == 0:
 ##            env.render(env)
@@ -111,15 +114,18 @@ for i_episode in range(EPISODES):
         statesVisited.append(observation)
         actionsTaken.append(action)
         stateRewards.append(reward)
-        
+        totalReward += reward
         if done:
-            print("Episode", i_episode+1, "finished after", t+1, "timesteps")
+            print("Episode", i_episode+1, "finished after", t+1, "timesteps. Final Reward:", totalReward)
             break
+   # if done or i_episode % 100 == 0:
+        # file.write(f'{i_episode+1},{totalReward}\n')
 
-    monteCarlo.updateValues_FirstVisit(statesVisited, stateRewards,actionsTaken)
+    monteCarlo.updateValues_FirstVisit(statesVisited, stateRewards, actionsTaken)
     
 ##    if i_episode % 5000 == 0:
 ##        print("Episode recap:\nState\t|\tReward")
 ##        for i in range(len(statesVisited)):
 ##            print(statesVisited[i], "\t|\t",stateRewards[i])
 env.close()
+#file.close()
