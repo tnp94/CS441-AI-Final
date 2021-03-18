@@ -21,7 +21,8 @@ class monteCarloLearningAgent():
     def __init__(self, actionSpaceSize, observationSpaceSize):
         self.actions = list(range(actionSpaceSize))
         # Changing default to -100 to help with late episode oscillations btwn two states not prev visited.
-        self.QMatrix = np.full((observationSpaceSize, actionSpaceSize), -100)
+##        self.QMatrix = np.full((observationSpaceSize, actionSpaceSize), -100)
+        self.QMatrix = np.random.rand(observationSpaceSize, actionSpaceSize)
         self.ReturnQMatrix = np.zeros((observationSpaceSize, actionSpaceSize, 2))
         # the two represents two items we're saving: Running average and the number of times the State/Action pair
         # have been visited. [0] is running average [1] is number of visits.
@@ -66,8 +67,6 @@ class monteCarloLearningAgent():
 
 
 
-
-
 def customRender(self, mode='human'):
     out = self.desc.copy().tolist()
     out = [[c.decode('utf-8') for c in line] for line in out]
@@ -105,9 +104,6 @@ for i_episode in range(EPISODES):
     actionsTaken = []
     totalReward = 0
     for t in range(MAX_STEPS):
-##        if i_episode % 5000 == 0:
-##            env.render(env)
-##            print(observation, "\n\n--------------------------------------")
         action = monteCarlo.chooseAction(observation)
         observation, reward, done, info = env.step(action)
 
@@ -118,7 +114,8 @@ for i_episode in range(EPISODES):
         if done:
             print("Episode", i_episode+1, "finished after", t+1, "timesteps. Final Reward:", totalReward)
             break
-   # if done or i_episode % 100 == 0:
+    if done or i_episode % 100 == 0:
+        print("Episode", i_episode+1, "finished after", t+1, "timesteps. Final Reward:", totalReward)
         # file.write(f'{i_episode+1},{totalReward}\n')
 
     monteCarlo.updateValues_FirstVisit(statesVisited, stateRewards, actionsTaken)
