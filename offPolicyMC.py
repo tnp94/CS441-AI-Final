@@ -16,7 +16,7 @@ import random
 
 EPSILON = 1
 GAMMA = 0.9  # Rate of discount.
-EPISODES = 10000
+EPISODES = 100000
 MAX_STEPS = 100
 
 
@@ -64,21 +64,22 @@ class MonteCarloLearningAgent:
         """
         # Value of reward returned from each time step
         ret_g = 0
-
+        self.totalWeight = 1
+        firstVisitDict = {}
         # Get the index of each state. Starting from the end
         for idx in reversed(range(len(states))):
             ret_g = GAMMA * ret_g + rewards[idx]
-            state_action_weight = self.cumulative_weights[states[idx]][actions[idx]]
-            self.cumulative_weights[states[idx]][actions[idx]] = state_action_weight + self.totalWeight
+            if (states[idx], actions[idx]) not in firstVisitDict:
+                firstVisitDict[(states[idx], actions[idx])] = 1
+                self.cumulative_weights[states[idx]][actions[idx]] += self.totalWeight
+                state_action_weight = self.cumulative_weights[states[idx]][actions[idx]]
+                q_value = self.QMatrix[states[idx]][actions[idx]]
+                new_q_value = q_value + (self.totalWeight/state_action_weight) * (ret_g - q_value)
+                self.QMatrix[states[idx]][actions[idx]] = new_q_value
 
-            q_value = self.QMatrix[states[idx]][actions[idx]]
-            new_q_value = q_value + (self.totalWeight/state_action_weight) * (ret_g - q_value)
-            self.QMatrix[states[idx]][actions[idx]] = new_q_value
-
-            # Only update the weights if the action was the best known action so far
-            if actions[idx] == max(self.QMatrix[states[idx]]):
-                # W * 1/ (b(At|St)  # Where b(At|St) is 1/6 because there are 6 actions randomly chosen
-                self.totalWeight = self.totalWeight * (1/(1/6))
+                if actions[idx] == int(np.where(self.QMatrix[states[idx]] == max(self.QMatrix[states[idx]]))[0][0]):
+                    # W * 1/ (b(At|St)  # Where b(At|St) is 1/6 because there are 6 actions randomly chosen
+                    self.totalWeight = self.totalWeight * (1/(1/6))
 
 
 def custom_render(self, mode='human'):
@@ -105,7 +106,7 @@ def custom_render(self, mode='human'):
 
 
 if __name__ == '__main__':
-    file = open('onPolicyData_training.csv', 'w')
+    #file = open('offPolicyData_training.csv', 'w')
     env = gym.make('Taxi-v3')
     env.render = custom_render
 
@@ -135,13 +136,12 @@ if __name__ == '__main__':
             actions_taken.append(action)
             stateRewards.append(reward)
             monteCarlo.totalReward += reward
-
             if done:
-                print("Episode", i_episode+1, "finished after", t+1, "time steps. Final Reward:", monteCarlo.totalReward)
+                #print("Episode", i_episode+1, "finished after", t+1, "time steps. Final Reward:", monteCarlo.totalReward)
                 break
 
-        if done or i_episode % 100 == 0:
-            file.write(f'{i_episode+1},{monteCarlo.totalReward}\n')
+        #if done or i_episode % 100 == 0:
+        #    file.write(f'{i_episode+1},{monteCarlo.totalReward}\n')
 
         monteCarlo.update_values_first_visit(statesVisited, stateRewards, actions_taken)
 
@@ -149,10 +149,10 @@ if __name__ == '__main__':
     ##        print("Episode recap:\nState\t|\tReward")
     ##        for i in range(len(statesVisited)):
     ##            print(statesVisited[i], "\t|\t",stateRewards[i])
-    file.close()
+    #file.close()
 
     # Trained Runs
-    file = open('onPolicyData_trained.csv', 'w')
+    file = open('offPolicyData_trained.csv', 'w')
 
     for i_episode in range(EPISODES):
         done = False
@@ -166,14 +166,15 @@ if __name__ == '__main__':
         for t in range(MAX_STEPS):
             action = monteCarlo.choose_action_trained(observation)
             observation, reward, done, info = env.step(action)
-
             # statesVisited.append(observation)
             # actions_taken.append(action)
             # stateRewards.append(reward)
             monteCarlo.totalReward += reward
 
+            if i_episode == 99990:
+                print(f"State: {observation} Action: {action} Reward: {reward}")
             if done:
-                print("Episode", i_episode+1, "finished after", t+1, "time steps. Final Reward:", monteCarlo.totalReward)
+                #print("Episode", i_episode+1, "finished after", t+1, "time steps. Final Reward:", monteCarlo.totalReward)
                 break
 
         if done or i_episode % 100 == 0:
